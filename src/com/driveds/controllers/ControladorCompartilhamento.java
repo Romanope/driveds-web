@@ -44,4 +44,9 @@ public class ControladorCompartilhamento {
 		
 		return compartilhamentoDAO.consultarCompartilhamentosArquivo(usuarioLogado, nomeArquivo);
 	}
+	
+	public void salvarCompartilhamento (Compartilhamento compartilhamento) {
+		
+		compartilhamentoDAO.save(compartilhamento);
+	}
 }

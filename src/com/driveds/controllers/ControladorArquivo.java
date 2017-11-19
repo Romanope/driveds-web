@@ -13,24 +13,38 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.driveds.apresentacao.Arquivo;
+import com.driveds.model.Compartilhamento;
+import com.driveds.model.Usuario;
 import com.driveds.util.Constantes;
 
 @Service
 public class ControladorArquivo {
 
+	@Autowired
+	private ControladorUsuario controladorUsuario;
+	
+	@Autowired 
+	private ControladorCompartilhamento controladorCompartilhamento;
+	
 	public void salvarArquivo (HttpServletRequest request, String login) throws Exception {
 		if(ServletFileUpload.isMultipartContent(request)){
             try {
                 List<FileItem> multiparts = new ServletFileUpload(new DiskFileItemFactory()).parseRequest(request);
+                String name = "";
                 for(FileItem item : multiparts){
                     if(!item.isFormField()){
-                        String name = new File(item.getName()).getName();
+                        name = new File(item.getName()).getName();
                         System.out.println("name "+name);
                         item.write(new File(Constantes.DEFAULT_DIRECTORY + login + File.separator + name));
                     }
+                }
+                if (name.length() > 0) {
+                	Usuario usuario = controladorUsuario.getUsuarioByLogin(login);
+                	atualizarFlagCompartilhamentos(usuario.getChavePrimaria(), name);
                 }
             } catch (Exception ex) {
             	ex.printStackTrace();
@@ -38,7 +52,7 @@ public class ControladorArquivo {
         }
 	}
 	
-	public void criarDiretorioUsuario(String login) {
+	public void criarDiretorioUsuario (String login) {
 		String diretorio = (Constantes.DEFAULT_DIRECTORY +  login);
 		File file = new File(diretorio);
 		if (!file.exists()) {
@@ -46,7 +60,7 @@ public class ControladorArquivo {
 		}
 	}
 
-	public List<Arquivo> obterArquivosPorUsusario(String login, String filtro) {
+	public List<Arquivo> obterArquivosPorUsusario (String login, String filtro) {
 		
 		List<Arquivo> arquivos = new ArrayList<Arquivo>();
 		
@@ -65,7 +79,7 @@ public class ControladorArquivo {
 		return arquivos;
 	}
 	
-	public void apagarArquivo(String login, String nomeArquivo) {
+	public void apagarArquivo (String login, String nomeArquivo) {
 		
 		String path = Constantes.DEFAULT_DIRECTORY + login + File.separator + nomeArquivo;
 		
@@ -75,7 +89,7 @@ public class ControladorArquivo {
 		}
 	}
 	
-	public void downloadFile(String login, String nomeArquivo, ServletOutputStream out) throws IOException {
+	public void downloadFile (String login, String nomeArquivo, ServletOutputStream out) throws IOException {
 	
 		String path = Constantes.DEFAULT_DIRECTORY + login + File.separator + nomeArquivo;
 	
@@ -88,5 +102,13 @@ public class ControladorArquivo {
 		fileIn.close();
 		out.flush();
 		out.close();
+	}
+	
+	private void atualizarFlagCompartilhamentos (Long usuarioDono, String fileName) {
+		List<Compartilhamento> compartilhamentos = controladorCompartilhamento.consultarCompartilhamentoArquivo(usuarioDono, fileName);
+		for (Compartilhamento compartilhamento: compartilhamentos) {
+			compartilhamento.setSincronizado(false);
+			controladorCompartilhamento.salvarCompartilhamento(compartilhamento);
+		}
 	}
 }
