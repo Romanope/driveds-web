@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.driveds.apresentacao.Arquivo;
+import com.driveds.apresentacao.ArquivoVO;
 import com.driveds.dao.CompartilhamentoDAO;
 import com.driveds.model.Compartilhamento;
 
@@ -19,13 +19,13 @@ public class ControladorCompartilhamento {
 	@Autowired
 	private CompartilhamentoDAO compartilhamentoDAO;
 	
-	public List<Arquivo> adicionarArqCompartilhamentos (List<Compartilhamento> compartilhamentos) {
+	public List<ArquivoVO> adicionarArqCompartilhamentos (List<Compartilhamento> compartilhamentos) {
 		
-		List<Arquivo> arqs = new ArrayList<Arquivo>();
+		List<ArquivoVO> arqs = new ArrayList<ArquivoVO>();
 
 		for (Compartilhamento com: compartilhamentos) {
-			Arquivo arq = controladorArquivo.obterArquivosPorUsusario(com.getUsuarioDono().getLogin(), com.getNomeArquivo()).get(0);
-			arq.setTitle(com.getUsuarioDono().getLogin().concat(" compartilhou com você"));
+			ArquivoVO arq = controladorArquivo.obterArquivosPorUsusario(com.getUsuarioDono().getLogin(), com.getNomeArquivo()).get(0);
+			arq.setTitle(com.getUsuarioDono().getLogin().concat(" compartilhou com vocï¿½"));
 			arq.setDeTerceiro(true);
 			arqs.add(arq);
 		}

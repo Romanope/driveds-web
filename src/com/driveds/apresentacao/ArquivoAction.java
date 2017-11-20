@@ -36,13 +36,13 @@ public class ArquivoAction extends BaseAction {
 	@RequestMapping(value = "/arquivo", method = RequestMethod.GET)
 	public ModelAndView getArquivos(HttpServletRequest request, ModelMap map) {
 		
-		ModelAndView model = new ModelAndView("arquivo", "command", new Arquivo());
+		ModelAndView model = new ModelAndView("arquivo", "command", new ArquivoVO());
 		
 		String login = (String) request.getSession().getAttribute("login");
 		
 		Usuario usuarioLogado = controladorUsuario.getUsuarioByLogin(login);
 
-		List<Arquivo> arquivos = controladorArquivo.obterArquivosPorUsusario(login, null);
+		List<ArquivoVO> arquivos = controladorArquivo.obterArquivosPorUsusario(login, null);
 
 		setNomeUsuariosCompartilhamentos(arquivos, usuarioLogado.getChavePrimaria());
 		
@@ -76,7 +76,7 @@ public class ArquivoAction extends BaseAction {
 		String login = (String) request.getSession().getAttribute("login");
 		
 		if (login == null) {
-			map.addAttribute("msgErro", gerarMensagemErro("Faça login para continuar!"));
+			map.addAttribute("msgErro", gerarMensagemErro("Faï¿½a login para continuar!"));
 			map.addAttribute("classErro", "center ui-alert");
 			return new ModelAndView("index");
 		}
@@ -111,7 +111,7 @@ public class ArquivoAction extends BaseAction {
 		try {
 			controladorArquivo.downloadFile(usuario, nomeArquivo, response.getOutputStream());
 		} catch (IOException e) {
-			map.addAttribute("msgErro", gerarMensagemErro("Não foi possível realizar o download. Tente novamente."));
+			map.addAttribute("msgErro", gerarMensagemErro("Nï¿½o foi possï¿½vel realizar o download. Tente novamente."));
 			map.addAttribute("classErro", "center ui-alert");
 			e.printStackTrace();
 		}
@@ -132,7 +132,7 @@ public class ArquivoAction extends BaseAction {
 		
 		String login = (String) request.getSession().getAttribute("login");
 		
-		List<Arquivo> arquivos = controladorArquivo.obterArquivosPorUsusario(login, filtro);
+		List<ArquivoVO> arquivos = controladorArquivo.obterArquivosPorUsusario(login, filtro);
 		
 		map.addAttribute("filtro", filtro);
 		
@@ -166,14 +166,14 @@ public class ArquivoAction extends BaseAction {
 	}
 	
 	private void mensagens (String erros, ModelMap map, String fileName) {
-		String msgError = "O arquivo " + fileName + " já foi compartilhado com o(s) usuário(s) " + erros;
+		String msgError = "O arquivo " + fileName + " jï¿½ foi compartilhado com o(s) usuï¿½rio(s) " + erros;
 		setMsg(map, msgError, null);
 	}
 	
-	private void setNomeUsuariosCompartilhamentos (List<Arquivo> arquivos, Long usuarioLogado) {
+	private void setNomeUsuariosCompartilhamentos (List<ArquivoVO> arquivos, Long usuarioLogado) {
 		
 		StringBuilder usuarios = new StringBuilder();
-		for (Arquivo arquivo: arquivos) {
+		for (ArquivoVO arquivo: arquivos) {
 			List <Compartilhamento> comps = controladorCompartilhamento.consultarCompartilhamentoArquivo(usuarioLogado, arquivo.getNome());
 			for (Compartilhamento compartilhamento: comps) {
 				usuarios = usuarios.length() == 0 ? usuarios.append(compartilhamento.getUsuarioCompartilhamento().getLogin()) : usuarios.append(", ").append(compartilhamento.getUsuarioCompartilhamento().getLogin());

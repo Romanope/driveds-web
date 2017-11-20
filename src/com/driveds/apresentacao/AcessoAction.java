@@ -33,7 +33,7 @@ public class AcessoAction extends AbstractController {
 		
 		Usuario usuario = controladorUsuario.getUsuarioByLogin(login);
 		if (usuario == null || !usuario.getSenha().equals(senha)) {
-			map.addAttribute("msgErro", gerarMensagemErro("Login ou senha inválido!"));
+			map.addAttribute("msgErro", gerarMensagemErro("Login ou senha invï¿½lido!"));
 			map.addAttribute("classErro", "center ui-alert");
 			map.addAttribute("login", login);
 			map.addAttribute("senha", senha);
@@ -72,19 +72,19 @@ public class AcessoAction extends AbstractController {
 		
 		request.getSession().setAttribute("login", login);
 		
-		return  new ModelAndView("redirect:/arquivo");
+		return new ModelAndView("redirect:/arquivo");
 	}
 
 	private ModelAndView validarEIncluirUsuario(ModelMap map, String login, String senha, String email) {
 		if (!dadosValidos(login, senha, email)) {
-			map.addAttribute("msgErro", gerarMensagemErro("Login ou senha inválido!"));
+			map.addAttribute("msgErro", gerarMensagemErro("Login ou senha invï¿½lido!"));
 			map.addAttribute("classErro", "center ui-alert");
 			setDadosForm(map, login, senha, email);
 			return new ModelAndView("index"); 
 		}
 		
 		if (controladorUsuario.getUsuarioByLogin(login) != null) {
-			map.addAttribute("msgErro", gerarMensagemErro("Usuário <b> " + login + " </b> já existe. Favor, entre com outro usuário!" ));
+			map.addAttribute("msgErro", gerarMensagemErro("Usuï¿½rio <b> " + login + " </b> jï¿½ existe. Favor, entre com outro usuï¿½rio!" ));
 			map.addAttribute("classErro", "center ui-alert");
 			setDadosForm(map, login, senha, email);
 			return new ModelAndView("index"); 

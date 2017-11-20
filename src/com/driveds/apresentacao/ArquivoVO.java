@@ -2,7 +2,7 @@ package com.driveds.apresentacao;
 
 import java.io.Serializable;
 
-public class Arquivo implements Serializable {
+public class ArquivoVO implements Serializable {
 
 	/**
 	 * 
@@ -23,14 +23,14 @@ public class Arquivo implements Serializable {
 	
 	private boolean deTerceiro;
 	
-	public Arquivo(String nome, String dataModificacao, String diretorioCompleto) {
+	public ArquivoVO(String nome, String dataModificacao, String diretorioCompleto) {
 		super();
 		this.nome = nome;
 		this.dataModificacao = dataModificacao;
 		this.diretorioCompleto = diretorioCompleto;
 	}
 
-	public Arquivo(String nome, String dataModificacao, long tamanho, String login) {
+	public ArquivoVO(String nome, String dataModificacao, long tamanho, String login) {
 		super();
 		this.nome = nome;
 		this.dataModificacao = dataModificacao;
@@ -38,7 +38,7 @@ public class Arquivo implements Serializable {
 		this.usuario = login;
 	}
 
-	public Arquivo() {
+	public ArquivoVO() {
 		
 	}
 	

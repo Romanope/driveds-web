@@ -16,7 +16,9 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.driveds.apresentacao.Arquivo;
+import com.driveds.apresentacao.ArquivoVO;
+import com.driveds.dao.ArquivoDAO;
+import com.driveds.model.Arquivo;
 import com.driveds.model.Compartilhamento;
 import com.driveds.model.Usuario;
 import com.driveds.util.Constantes;
@@ -29,6 +31,9 @@ public class ControladorArquivo {
 	
 	@Autowired 
 	private ControladorCompartilhamento controladorCompartilhamento;
+
+	@Autowired
+	private ArquivoDAO arquivoDAO;
 	
 	public void salvarArquivo (HttpServletRequest request, String login) throws Exception {
 		if(ServletFileUpload.isMultipartContent(request)){
@@ -44,6 +49,7 @@ public class ControladorArquivo {
                 }
                 if (name.length() > 0) {
                 	Usuario usuario = controladorUsuario.getUsuarioByLogin(login);
+                	salvarAtualizarArquivo(usuario, name);
                 	atualizarFlagCompartilhamentos(usuario.getChavePrimaria(), name);
                 }
             } catch (Exception ex) {
@@ -60,19 +66,19 @@ public class ControladorArquivo {
 		}
 	}
 
-	public List<Arquivo> obterArquivosPorUsusario (String login, String filtro) {
+	public List<ArquivoVO> obterArquivosPorUsusario (String login, String filtro) {
 		
-		List<Arquivo> arquivos = new ArrayList<Arquivo>();
+		List<ArquivoVO> arquivos = new ArrayList<ArquivoVO>();
 		
 		File diretorio = new File(Constantes.DEFAULT_DIRECTORY.concat(login));
 		if (diretorio.exists()) {
 			for (File file: diretorio.listFiles()) {
 				if (filtro != null) {
 					if (file.getName().contains(filtro)) {
-						arquivos.add(new Arquivo(file.getName(), new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date(file.lastModified())), file.getUsableSpace(), login));
+						arquivos.add(new ArquivoVO(file.getName(), new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date(file.lastModified())), file.getUsableSpace(), login));
 					}	
 				} else {
-					arquivos.add(new Arquivo(file.getName(), new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date(file.lastModified())), file.getUsableSpace(), login));
+					arquivos.add(new ArquivoVO(file.getName(), new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date(file.lastModified())), file.getUsableSpace(), login));
 				}
 			}
 		}
@@ -110,5 +116,27 @@ public class ControladorArquivo {
 			compartilhamento.setSincronizado(false);
 			controladorCompartilhamento.salvarCompartilhamento(compartilhamento);
 		}
+	}
+	
+	public void salvarAtualizarArquivo (Usuario usuario, String nomeArquivo) {
+		
+		Arquivo arquivo = consultarArquivo(usuario.getChavePrimaria(), nomeArquivo);
+		if (arquivo == null) {
+			arquivo = new Arquivo();
+			arquivo.setNome(nomeArquivo);
+			arquivo.setUsuario(usuario);
+		}
+		arquivo.setSincronizado(false);
+		salvarArquivo(arquivo);
+	}
+	
+	public Arquivo consultarArquivo (Long chavePrimaria, String nomeArquivo) {
+		
+		return arquivoDAO.consultarArquivo(chavePrimaria, nomeArquivo);
+	}
+	
+	public void salvarArquivo (Arquivo arquivo) {
+		
+		arquivoDAO.save(arquivo);
 	}
 }
