@@ -1,7 +1,7 @@
 create database driveds;
 use driveds;
 
-create table usuario 
+create table USUARIO 
 (
 	USU_ID          	   integer NOT NULL AUTO_INCREMENT,
     USU_LOGIN       	   varchar(100) not null,
@@ -12,7 +12,7 @@ create table usuario
     primary key(USU_ID)
 ) ENGINE = INNODB;
 
-create table compartilhamento (
+create table COMPARTILHAMENTO (
 
 COMP_ID     integer NOT NULL AUTO_INCREMENT,
 USU_ID_PROP integer NOT NULL,
@@ -24,7 +24,7 @@ primary key (COMP_ID)
 
 ) ENGINE=innoDB;
 
-alter table driveds.compartilhamento add constraint fk_id_user_dono_file1 foreign key (USU_ID_PROP) references driveds.usuario (USU_ID);
-alter table driveds.compartilhamento add constraint fk_id_user_comp_file1 foreign key (USU_ID_COMP) references driveds.usuario (USU_ID);
+alter table driveds.COMPARTILHAMENTO add constraint fk_id_user_dono_file1 foreign key (USU_ID_PROP) references driveds.USUARIO (USU_ID);
+alter table driveds.COMPARTILHAMENTO add constraint fk_id_user_comp_file1 foreign key (USU_ID_COMP) references driveds.USUARIO (USU_ID);
 
 commit;
