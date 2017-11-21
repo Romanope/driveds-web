@@ -23,6 +23,8 @@ public class ArquivoVO implements Serializable {
 	
 	private boolean deTerceiro;
 	
+	private long chavePrimariaArquivo;
+	
 	public ArquivoVO(String nome, String dataModificacao, String diretorioCompleto) {
 		super();
 		this.nome = nome;
@@ -96,5 +98,13 @@ public class ArquivoVO implements Serializable {
 
 	public void setDeTerceiro(boolean deTerceiro) {
 		this.deTerceiro = deTerceiro;
+	}
+
+	public long getChavePrimariaArquivo() {
+		return chavePrimariaArquivo;
+	}
+
+	public void setChavePrimariaArquivo(long chavePrimariaArquivo) {
+		this.chavePrimariaArquivo = chavePrimariaArquivo;
 	}
 }

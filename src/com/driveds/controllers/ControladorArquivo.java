@@ -16,6 +16,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.driveds.adapters.AmazonS3Adapter;
 import com.driveds.apresentacao.ArquivoVO;
 import com.driveds.dao.ArquivoDAO;
 import com.driveds.model.Arquivo;
@@ -47,10 +48,14 @@ public class ControladorArquivo {
                         item.write(new File(Constantes.DEFAULT_DIRECTORY + login + File.separator + name));
                     }
                 }
-                if (name.length() > 0) {
-                	Usuario usuario = controladorUsuario.getUsuarioByLogin(login);
+                
+                File file = new File(Constantes.DEFAULT_DIRECTORY + login + File.separator + name);
+                AmazonS3Adapter s3 = AmazonS3Adapter.get();
+                if (s3.uploadFile(login, file)) {
+                	Usuario usuario = controladorUsuario.getUsuarioByLogin(login, true);
                 	salvarAtualizarArquivo(usuario, name);
                 	atualizarFlagCompartilhamentos(usuario.getChavePrimaria(), name);
+                	file.delete();
                 }
             } catch (Exception ex) {
             	ex.printStackTrace();
@@ -66,52 +71,50 @@ public class ControladorArquivo {
 		}
 	}
 
-	public List<ArquivoVO> obterArquivosPorUsusario (String login, String filtro) {
+	public List<ArquivoVO> obterArquivosPorUsusario (Usuario usuario, String filtro) {
 		
 		List<ArquivoVO> arquivos = new ArrayList<ArquivoVO>();
-		
-		File diretorio = new File(Constantes.DEFAULT_DIRECTORY.concat(login));
-		if (diretorio.exists()) {
-			for (File file: diretorio.listFiles()) {
-				if (filtro != null) {
-					if (file.getName().contains(filtro)) {
-						arquivos.add(new ArquivoVO(file.getName(), new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date(file.lastModified())), file.getUsableSpace(), login));
-					}	
-				} else {
-					arquivos.add(new ArquivoVO(file.getName(), new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date(file.lastModified())), file.getUsableSpace(), login));
-				}
-			}
+		List<Arquivo> arquivosUsuario = consultarArquivos(usuario.getChavePrimaria(), filtro);
+		for (Arquivo arquivo: arquivosUsuario) {
+			ArquivoVO arquivoVO = new ArquivoVO(arquivo.getNome(), new SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date()), 321321, usuario.getLogin());
+			arquivoVO.setChavePrimariaArquivo(arquivo.getChavePrimaria());
+			arquivos.add(arquivoVO);
 		}
+		
 		return arquivos;
 	}
-	
-	public void apagarArquivo (String login, String nomeArquivo) {
+	/**
+	 * Remove arquivo do diretório do usuário no S3 da amazon
+	 * @param login
+	 * @param nomeArquivo
+	 * @return true, case success on delete
+	 */
+	public boolean apagarArquivo (String login, String nomeArquivo) {
 		
-		String path = Constantes.DEFAULT_DIRECTORY + login + File.separator + nomeArquivo;
+		AmazonS3Adapter s3 = AmazonS3Adapter.get();
 		
-		File file = new File(path);
-		if (file.exists()) {
-			file.delete();
-		}
+		return s3.deleteFile(login, nomeArquivo);
 	}
 	
 	public void downloadFile (String login, String nomeArquivo, ServletOutputStream out) throws IOException {
 	
-		String path = Constantes.DEFAULT_DIRECTORY + login + File.separator + nomeArquivo;
-	
-		FileInputStream fileIn = new FileInputStream(path);
+		File file = AmazonS3Adapter.get().downloadFile(login, nomeArquivo);
+		FileInputStream fileIn = new FileInputStream(file);
 	
 		byte[] outputByte = new byte[4096];
 		while (fileIn.read(outputByte, 0, 4096) != -1) {
 			out.write(outputByte, 0, 4096);
 		}
+		
 		fileIn.close();
 		out.flush();
 		out.close();
+		file.delete();
 	}
 	
 	private void atualizarFlagCompartilhamentos (Long usuarioDono, String fileName) {
-		List<Compartilhamento> compartilhamentos = controladorCompartilhamento.consultarCompartilhamentoArquivo(usuarioDono, fileName);
+		Arquivo arquivo = consultarArquivo(usuarioDono, fileName);
+		List<Compartilhamento> compartilhamentos = controladorCompartilhamento.consultarCompartilhamentoArquivo(usuarioDono, arquivo.getChavePrimaria());
 		for (Compartilhamento compartilhamento: compartilhamentos) {
 			compartilhamento.setSincronizado(false);
 			controladorCompartilhamento.salvarCompartilhamento(compartilhamento);
@@ -138,5 +141,27 @@ public class ControladorArquivo {
 	public void salvarArquivo (Arquivo arquivo) {
 		
 		arquivoDAO.save(arquivo);
+	}
+	
+	public Arquivo removerArquivo (Usuario usuario, String nomeArquivo) {
+		
+		Arquivo arquivo = consultarArquivo(usuario.getChavePrimaria(), nomeArquivo);
+		if (arquivo != null) {
+			arquivo.setRemovido(true);
+			arquivo.setSincronizado(false);
+			arquivoDAO.save(arquivo);
+		}
+		
+		return arquivo;
+	}
+	
+	public List<Arquivo> consultarArquivos (Long chavePrimariaUsuario, String nomeArquivo) {
+		
+		return arquivoDAO.consultarArquivos(chavePrimariaUsuario, nomeArquivo);
+	}
+	
+	public Arquivo obterArquivo (Long chavePrimaria) {
+		
+		return arquivoDAO.get(chavePrimaria);
 	}
 }

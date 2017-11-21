@@ -21,7 +21,7 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
 		
 	}
 	
-	public Usuario getUsuarioByLogin(String login) {
+	public Usuario getUsuarioByLogin(String login, boolean lazy) {
 		
 		Session session = HibernateSession.getSession();
 		
@@ -30,7 +30,9 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
 		try {
 			Criteria criteria = session.createCriteria(Usuario.class);
 			criteria.add(Restrictions.eq("login", login));
-			
+			if (lazy) {
+				criteria.setFetchMode("arquivosCompartilhados", FetchMode.JOIN);
+			}
 			return (Usuario) criteria.uniqueResult();
 		} finally {
 			session.getTransaction().commit();
@@ -54,14 +56,5 @@ public class UsuarioDAO extends GenericDAO<Usuario> {
 		session.beginTransaction();
 		
 		return session.createCriteria(Usuario.class).add(Restrictions.in("chavePrimaria", ids)).list();
-	}
-
-	public List<Compartilhamento> consultarCompartilhamentoPorUsuarioRecebido(Usuario usuario) {
-		
-		Session session = HibernateSession.getSession();
-		
-		session.beginTransaction();
-		
-		return session.createCriteria(Compartilhamento.class).add(Restrictions.eq("usuarioCompartilhamento.chavePrimaria", usuario.getChavePrimaria())).list();
 	}
 }

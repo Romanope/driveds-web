@@ -84,14 +84,14 @@
 		return false;
 	}
 	
-	function openModal (nomeArquivo) {
+	function openModal (chaveArquivo) {
 		$("#myModal").dialog({
 			autoOpen: false,
 			modal: true,
 			width: 500
 		});
 
-		setFileName(nomeArquivo);
+		setFileName(chaveArquivo);
 
 		$("#myModal").dialog("open");
 		
@@ -130,7 +130,7 @@
 		}
 
 		$.get(
-			'/driveds-web/compartilhar?usuarios=' + ids + '&fileName=' + getFileName(), 
+			'/driveds-web/compartilhar?usuarios=' + ids + '&chaveArquivo=' + getFileName(), 
 			function( data ) {
 			   $('#myModal').dialog('close');
 			   usuarioSelecionados = [];
@@ -139,12 +139,12 @@
 		);
 	}
 	
-	function setFileName(fileName) {
-		$('#fileName').val(fileName);
+	function setFileName(chaveArquivo) {
+		$('#chaveArquivo').val(chaveArquivo);
 	}
 	
-	function getFileName(fileName) {
-		return $('#fileName').val();
+	function getFileName() {
+		return $('#chaveArquivo').val();
 	}
 	
 	function setBodyTable(rows) {
@@ -154,7 +154,7 @@
 </head>
 <body style="background-color: #F0F8FF;">
 		<div>${ mensagem }</div>
-		<input type="hidden" id="fileName" />
+		<input type="hidden" id="chaveArquivo" />
 		<div class="center" style="width: 70%">
 			
 			<form method="POST" action="/driveds-web/addArquivo" enctype = "multipart/form-data" class="dropzone">
@@ -194,7 +194,7 @@
 							<td style="height: 40px"><div>${ arquivo.tamanho }</div></td>
 							<td style="height: 40px"><div style="width: 40px; height: 40px" >
 									<c:if test="${ !arquivo.deTerceiro }">
-										<button class="btn btn-link img-responsive" onclick="openModal('${ arquivo.nome }')">
+										<button class="btn btn-link img-responsive" onclick="openModal('${ arquivo.chavePrimariaArquivo }')">
 											<img src="resources/images/share.png" class="img-responsive">
 										</button>
 									</c:if>

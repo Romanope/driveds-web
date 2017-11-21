@@ -31,7 +31,7 @@ public class AcessoAction extends AbstractController {
 		String login = request.getParameter("login");
 		String senha = request.getParameter("senha");
 		
-		Usuario usuario = controladorUsuario.getUsuarioByLogin(login);
+		Usuario usuario = controladorUsuario.getUsuarioByLogin(login, true);
 		if (usuario == null || !usuario.getSenha().equals(senha)) {
 			map.addAttribute("msgErro", gerarMensagemErro("Login ou senha inv�lido!"));
 			map.addAttribute("classErro", "center ui-alert");
@@ -83,7 +83,7 @@ public class AcessoAction extends AbstractController {
 			return new ModelAndView("index"); 
 		}
 		
-		if (controladorUsuario.getUsuarioByLogin(login) != null) {
+		if (controladorUsuario.getUsuarioByLogin(login, true) != null) {
 			map.addAttribute("msgErro", gerarMensagemErro("Usu�rio <b> " + login + " </b> j� existe. Favor, entre com outro usu�rio!" ));
 			map.addAttribute("classErro", "center ui-alert");
 			setDadosForm(map, login, senha, email);

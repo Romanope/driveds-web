@@ -13,6 +13,7 @@
 		
 		<mapping class="com.driveds.model.Usuario"></mapping>
 		<mapping class="com.driveds.model.Compartilhamento"></mapping>
+		<mapping class="com.driveds.model.Arquivo"></mapping>
 
 	</session-factory>
 </hibernate-configuration>

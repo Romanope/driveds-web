@@ -43,11 +43,14 @@ public class Usuario implements Serializable {
 	@Column(name = "USU_DH_CADASTRO", nullable = true)
 	private java.sql.Date data;
 	
-	@OneToMany(mappedBy = "usuarioDono", targetEntity = Compartilhamento.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "usuarioDono", targetEntity = Compartilhamento.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Compartilhamento> arquivosCompartilhados;
 
-	@OneToMany(mappedBy = "usuarioCompartilhamento", targetEntity = Compartilhamento.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "usuarioCompartilhamento", targetEntity = Compartilhamento.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Compartilhamento> arquivosRecebidos;
+	
+	@OneToMany(mappedBy = "usuario", targetEntity = Arquivo.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Arquivo> arquivos;
 	
 	public Usuario() {
 		arquivosCompartilhados = new ArrayList<Compartilhamento>();
@@ -114,5 +117,9 @@ public class Usuario implements Serializable {
 
 	public List<Compartilhamento> getArquivosCompartilhados() {
 		return arquivosCompartilhados;
+	}
+
+	public List<Arquivo> getArquivos() {
+		return arquivos;
 	}
 }

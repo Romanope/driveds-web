@@ -17,6 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.driveds.controllers.ControladorArquivo;
 import com.driveds.controllers.ControladorCompartilhamento;
 import com.driveds.controllers.ControladorUsuario;
+import com.driveds.model.Arquivo;
 import com.driveds.model.Compartilhamento;
 import com.driveds.model.Usuario;
 
@@ -40,13 +41,13 @@ public class ArquivoAction extends BaseAction {
 		
 		String login = (String) request.getSession().getAttribute("login");
 		
-		Usuario usuarioLogado = controladorUsuario.getUsuarioByLogin(login);
+		Usuario usuarioLogado = controladorUsuario.getUsuarioByLogin(login, true);
 
-		List<ArquivoVO> arquivos = controladorArquivo.obterArquivosPorUsusario(login, null);
+		List<ArquivoVO> arquivos = controladorArquivo.obterArquivosPorUsusario(usuarioLogado, null);
 
 		setNomeUsuariosCompartilhamentos(arquivos, usuarioLogado.getChavePrimaria());
 		
-		List<Compartilhamento> compartilhamentos = controladorUsuario.consultarCompartilhamentos(usuarioLogado);
+		List<Compartilhamento> compartilhamentos = controladorCompartilhamento.consultarCompartilhamentosRecebidos(usuarioLogado.getChavePrimaria(), null);
 		
 		arquivos.addAll(controladorCompartilhamento.adicionarArqCompartilhamentos(compartilhamentos));		
 
@@ -55,6 +56,8 @@ public class ArquivoAction extends BaseAction {
 		request.getSession().setAttribute("listaArquivos", arquivos);
 		
 		request.getSession().setAttribute("usuarios", usuarios);
+		
+		map.addAttribute("filtro", null);
 		
 		return model;
 	}
@@ -66,6 +69,10 @@ public class ArquivoAction extends BaseAction {
 		String nomeArquivo = request.getParameter("nomeArquivo");
 		
 		controladorArquivo.apagarArquivo(login, nomeArquivo);
+		
+		Arquivo arqRemovido = controladorArquivo.removerArquivo(controladorUsuario.getUsuarioByLogin(login, true), nomeArquivo);
+		
+		controladorCompartilhamento.invativarCompartilhamentos(arqRemovido.getChavePrimaria());
 		
 		return getArquivos(request, map);
 	}
@@ -132,11 +139,19 @@ public class ArquivoAction extends BaseAction {
 		
 		String login = (String) request.getSession().getAttribute("login");
 		
-		List<ArquivoVO> arquivos = controladorArquivo.obterArquivosPorUsusario(login, filtro);
+		Usuario usuarioLogado = controladorUsuario.getUsuarioByLogin(login, true);
+
+		List<ArquivoVO> arquivos = controladorArquivo.obterArquivosPorUsusario(usuarioLogado, filtro);
+
+		setNomeUsuariosCompartilhamentos(arquivos, usuarioLogado.getChavePrimaria());
+		
+		List<Compartilhamento> compartilhamentos = controladorCompartilhamento.consultarCompartilhamentosRecebidos(usuarioLogado.getChavePrimaria(), filtro);
+		
+		arquivos.addAll(controladorCompartilhamento.adicionarArqCompartilhamentos(compartilhamentos));		
+
+		request.getSession().setAttribute("listaArquivos", arquivos);
 		
 		map.addAttribute("filtro", filtro);
-		
-		request.getSession().setAttribute("listaArquivos", arquivos);
 		
 		return model;
 	}
@@ -152,15 +167,18 @@ public class ArquivoAction extends BaseAction {
 			ids[i] = Long.valueOf(idsStr[i]);
 		}
 		
-		String fileName = request.getParameter("fileName");
+		Long chaveArquivo = null;
+		if (request.getParameter("chaveArquivo") != null && request.getParameter("chaveArquivo").length() > 0) {
+			chaveArquivo = Long.valueOf(request.getParameter("chaveArquivo"));
+		}
 		
 		List<Usuario> usuariosCompartilhamento = controladorUsuario.getUserById(ids);		
 		
-		Usuario usuarioLogado = controladorUsuario.getUsuarioByLogin((String)request.getSession().getAttribute("login"));
+		Usuario usuarioLogado = controladorUsuario.getUsuarioByLogin((String)request.getSession().getAttribute("login"), true);
 		
-		String erros = controladorUsuario.salvarCompartilhamento(fileName, usuarioLogado, usuariosCompartilhamento);
+		String erros = controladorCompartilhamento.salvarCompartilhamento(chaveArquivo, usuarioLogado, usuariosCompartilhamento);
 		
-		mensagens(erros, map, fileName);
+//		mensagens(erros, map, fileName);
 		
 		return getArquivos(request, map);
 	}
@@ -174,7 +192,7 @@ public class ArquivoAction extends BaseAction {
 		
 		StringBuilder usuarios = new StringBuilder();
 		for (ArquivoVO arquivo: arquivos) {
-			List <Compartilhamento> comps = controladorCompartilhamento.consultarCompartilhamentoArquivo(usuarioLogado, arquivo.getNome());
+			List <Compartilhamento> comps = controladorCompartilhamento.consultarCompartilhamentoArquivo(usuarioLogado, arquivo.getChavePrimariaArquivo());
 			for (Compartilhamento compartilhamento: comps) {
 				usuarios = usuarios.length() == 0 ? usuarios.append(compartilhamento.getUsuarioCompartilhamento().getLogin()) : usuarios.append(", ").append(compartilhamento.getUsuarioCompartilhamento().getLogin());
 			}

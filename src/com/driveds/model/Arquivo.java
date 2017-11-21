@@ -1,5 +1,7 @@
 package com.driveds.model;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,9 +13,14 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "ARQUIVO")
-public class Arquivo {
+public class Arquivo implements Serializable {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ARQ_ID")

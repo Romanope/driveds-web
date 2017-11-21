@@ -22,8 +22,8 @@ public class ControladorUsuario {
 		return repoUsuario.save(usuario);
 	}
 	
-	public Usuario getUsuarioByLogin(String login) {
-		return repoUsuario.getUsuarioByLogin(login);
+	public Usuario getUsuarioByLogin(String login, boolean lazy) {
+		return repoUsuario.getUsuarioByLogin(login, lazy);
 	}
 	
 	public Usuario criarUsuario(String login, String senha, String email) {
@@ -47,40 +47,5 @@ public class ControladorUsuario {
 	public List<Usuario> getUserById(Long[] ids) {
 		
 		return repoUsuario.getUserById(ids);
-	}
-	
-	public String salvarCompartilhamento(String nomeArq, Usuario usuarioPropArq, List<Usuario> usuariosCompartilhamento) {
-		
-		Compartilhamento compartilhamento;
-		StringBuilder errors = new StringBuilder();
-		boolean salvar = false;
-		for (Usuario usuario: usuariosCompartilhamento) {
-			if (compartilhamentoValido(errors, usuario, usuarioPropArq, nomeArq)) {
-				compartilhamento = new Compartilhamento();
-				compartilhamento.setUsuarioCompartilhamento(usuario);
-				compartilhamento.setUsuarioDono(usuarioPropArq);
-				compartilhamento.setNomeArquivo(nomeArq);
-				usuarioPropArq.getArquivosCompartilhados().add(compartilhamento);
-				salvar = true;
-			}
-		}
-		
-		if (salvar) {
-			this.salvarUsuario(usuarioPropArq);
-		}
-		
-		return errors.toString();
-	}
-	
-	public List<Compartilhamento> consultarCompartilhamentos(Usuario usuario) {
-		return repoUsuario.consultarCompartilhamentoPorUsuarioRecebido(usuario);
-	}
-	
-	private boolean compartilhamentoValido (StringBuilder errors, Usuario UsuarioCompartilhamento, Usuario UsuarioLogado, String nomeArquivo) {
-		if (controladorCompartilhamento.existeCompartilhamento(UsuarioLogado.getChavePrimaria(), UsuarioCompartilhamento.getChavePrimaria(), nomeArquivo)) {
-			errors = errors.length() == 0 ? errors.append(UsuarioCompartilhamento.getLogin()) : errors.append(", ").append(UsuarioCompartilhamento.getLogin());
-			return false;
-		}
-		return true;
 	}
 }

@@ -1,5 +1,7 @@
 package com.driveds.dao;
 
+import java.util.List;
+
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -30,5 +32,25 @@ public class ArquivoDAO extends GenericDAO<Arquivo> {
 		} finally {
 			session.getTransaction().commit();
 		}
+	}
+	
+	public List<Arquivo> consultarArquivos (Long chavePrimariaUsuario, String nomeArquivo) {
+		
+		Session session = HibernateSession.getSession();
+		session.beginTransaction();
+		try {
+			
+			Criteria criteria = session.createCriteria(Arquivo.class);
+			criteria.add(Restrictions.eq("usuario.chavePrimaria", chavePrimariaUsuario));
+			criteria.add(Restrictions.eq("removido", false));
+			if (nomeArquivo != null && nomeArquivo.length() > 0) {
+				criteria.add(Restrictions.like("nome", nomeArquivo));
+			}
+			
+			return criteria.list();
+		} finally {
+			session.getTransaction().commit();
+		}
+		
 	}
 }

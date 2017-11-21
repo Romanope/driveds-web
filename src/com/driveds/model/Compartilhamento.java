@@ -29,8 +29,9 @@ public class Compartilhamento implements Serializable {
 	@JoinColumn(name="USU_ID_PROP")
 	private Usuario usuarioDono;
 	
-	@Column(name = "FILE_NAME", nullable = false)
-	private String nomeArquivo;
+	@ManyToOne
+	@JoinColumn(name="ARQ_ID")
+	private Arquivo arquivo;
 	
 	@ManyToOne
 	@JoinColumn(name="USU_ID_COMP")
@@ -39,9 +40,12 @@ public class Compartilhamento implements Serializable {
 	@Column(name = "COMP_SYN", nullable = false)
 	private boolean sincronizado;
 	
-	public Compartilhamento(Usuario usuarioDono, String nomeArquivo, Usuario usuarioCompartilhamento) {
+	@Column(name = "COMP_ATIVO", nullable = false)
+	private boolean ativo;
+	
+	public Compartilhamento(Usuario usuarioDono, Arquivo arquivo, Usuario usuarioCompartilhamento) {
 		this.usuarioDono = usuarioDono;
-		this.nomeArquivo = nomeArquivo;
+		this.arquivo = arquivo;
 		this.usuarioCompartilhamento = usuarioCompartilhamento;
 	}
 
@@ -57,12 +61,12 @@ public class Compartilhamento implements Serializable {
 		this.usuarioDono = usuarioDono;
 	}
 
-	public String getNomeArquivo() {
-		return nomeArquivo;
+	public Arquivo getArquivo() {
+		return arquivo;
 	}
 
-	public void setNomeArquivo(String nomeArquivo) {
-		this.nomeArquivo = nomeArquivo;
+	public void setArquivo(Arquivo arquivo) {
+		this.arquivo = arquivo;
 	}
 
 	public Usuario getUsuarioCompartilhamento() {
@@ -79,5 +83,13 @@ public class Compartilhamento implements Serializable {
 
 	public void setSincronizado(boolean sincronizado) {
 		this.sincronizado = sincronizado;
+	}
+
+	public boolean isAtivo() {
+		return ativo;
+	}
+
+	public void setAtivo(boolean ativo) {
+		this.ativo = ativo;
 	}
 }
